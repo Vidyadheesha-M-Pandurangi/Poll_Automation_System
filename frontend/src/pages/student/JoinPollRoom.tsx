@@ -3,7 +3,6 @@ import {
   BarChart3, 
   Gauge, 
   Users, 
-  Settings, 
   HelpCircle, 
   Check, 
   Vote
@@ -86,9 +85,6 @@ export default function JoinPollRoom() {
                 </a>
                 <a href="#" className="flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-900 hover:shadow-md hover:shadow-slate-200/50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700 dark:hover:text-white dark:hover:shadow-gray-900/20 transition-all duration-300">
                   <BarChart3 className="mr-3 h-4 w-4" /> Analytics
-                </a>
-                <a href="#" className="flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-900 hover:shadow-md hover:shadow-slate-200/50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700 dark:hover:text-white dark:hover:shadow-gray-900/20 transition-all duration-300">
-                  <Settings className="mr-3 h-4 w-4" /> Settings
                 </a>
                 <a href="#" className="flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-900 hover:shadow-md hover:shadow-slate-200/50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700 dark:hover:text-white dark:hover:shadow-gray-900/20 transition-all duration-300">
                   <HelpCircle className="mr-3 h-4 w-4" /> Help

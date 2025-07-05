@@ -20,7 +20,7 @@ export default function GenAIHomePage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const [questionsPerSegment, setQuestionsPerSegment] = useState(2);
@@ -72,7 +72,7 @@ export default function GenAIHomePage() {
   };
 
   const startRecording = async () => {
-    setAudioBlob(null);
+    
     setIsPaused(false);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

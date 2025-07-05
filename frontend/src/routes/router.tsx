@@ -21,6 +21,10 @@ import TeacherPollRoom from '@/pages/teacher/TeacherPollRoom'
 import CreatePollRoom from '@/pages/teacher/CreatePollRoom'
 import JoinPollRoom from '@/pages/student/JoinPollRoom'
 import StudentPollRoom from '@/pages/student/StudentPollRoom'
+import TeacherSettings from '@/pages/teacher/Settings'
+import StudentSettings from '@/pages/student/Settings'
+import TeacherDashboard from '@/pages/teacher/dashboard'
+import StudentDashboard from '@/pages/student/dashboard'
 
 // Root route with error and notFound handling
 const rootRoute = new RootRoute({
@@ -152,6 +156,20 @@ const teacherCreateRoomRoute = new Route({
   component: CreatePollRoom ,
 });
 
+// Teacher Settings route
+const teacherSettingsRoute = new Route({
+  getParentRoute: () => teacherLayoutRoute,
+  path: '/settings',
+  component: TeacherSettings,
+});
+
+// Teacher Dashboard route (default)
+const teacherDashboardRoute = new Route({
+  getParentRoute: () => teacherLayoutRoute,
+  path: '/',
+  component: TeacherDashboard,
+});
+
 // Student poll room route
 const studentPollRoomRoute = new Route({
   getParentRoute: () => studentLayoutRoute,
@@ -166,6 +184,20 @@ const studentJoinRoomRoute = new Route({
   component: JoinPollRoom,
 });
 
+// Student Settings route
+const studentSettingsRoute = new Route({
+  getParentRoute: () => studentLayoutRoute,
+  path: '/settings',
+  component: StudentSettings,
+});
+
+// Student Dashboard route (default)
+const studentDashboardRoute = new Route({
+  getParentRoute: () => studentLayoutRoute,
+  path: '/',
+  component: StudentDashboard,
+});
+
 // Create a catch-all not found route
 const notFoundRoute = new NotFoundRoute({
   getParentRoute: () => rootRoute,
@@ -177,13 +209,17 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   authRoute,
   teacherLayoutRoute.addChildren([
+    teacherDashboardRoute,
     teacherGenAIHomeRoute,
     teacherPollRoomRoute,
     teacherCreateRoomRoute,
+    teacherSettingsRoute,
   ]),
   studentLayoutRoute.addChildren([
+    studentDashboardRoute,
     studentPollRoomRoute,
     studentJoinRoomRoute,
+    studentSettingsRoute,
   ]),
 ]);
 

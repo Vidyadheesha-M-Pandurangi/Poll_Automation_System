@@ -12,7 +12,7 @@ const api = axios.create({ baseURL: API_URL });
 
 const AuroraText = ({
   children,
-  colors = ["#A07CFE", "#FE8FB5", "#FFBE7B"],
+
 }: {
   children: React.ReactNode;
   colors?: string[];

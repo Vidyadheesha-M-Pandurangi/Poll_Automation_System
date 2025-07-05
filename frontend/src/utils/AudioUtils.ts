@@ -301,7 +301,7 @@ class WebmBase<T> {
     source?: Uint8Array;
     data?: T;
 
-    constructor(private name = "Unknown", private type = "Unknown") {}
+    constructor() {}
 
     updateBySource() {}
 
@@ -319,8 +319,8 @@ class WebmBase<T> {
 }
 
 class WebmUint extends WebmBase<string> {
-    constructor(name: string, type: string) {
-        super(name, type || "Uint");
+    constructor() {
+        super();
     }
 
     updateBySource() {
@@ -355,8 +355,8 @@ function padHex(hex: string) {
 }
 
 class WebmFloat extends WebmBase<number> {
-    constructor(name: string, type: string) {
-        super(name, type || "Float");
+    constructor() {
+        super();
     }
 
     getFloatArrayType() {
@@ -394,8 +394,8 @@ class WebmContainer extends WebmBase<ContainerData[]> {
     offset: number = 0;
     data: ContainerData[] = [];
 
-    constructor(name: string, type: string) {
-        super(name, type || "Container");
+    constructor() {
+        super();
     }
 
     readByte() {
@@ -438,7 +438,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
                     ctr = WebmFloat;
                     break;
             }
-            const section = new ctr(info.name, info.type);
+            const section = new ctr();
             section.setSource(data);
             this.data.push({
                 id: id,
@@ -505,7 +505,7 @@ class WebmContainer extends WebmBase<ContainerData[]> {
 
 class WebmFile extends WebmContainer {
     constructor(source: Uint8Array) {
-        super("File", "File");
+        super();
         this.setSource(source);
     }
 
@@ -538,7 +538,7 @@ class WebmFile extends WebmContainer {
             }
         } else {
             // append Duration section
-            durationSection = new WebmFloat("Duration", "Float");
+            durationSection = new WebmFloat();
             durationSection.setValue(duration);
             infoSection.data.push({
                 id: 0x489,
