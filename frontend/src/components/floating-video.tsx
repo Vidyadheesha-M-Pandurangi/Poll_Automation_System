@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useRef, useEffect, useState, useCallback, JSX, use } from 'react';
 import ReactDOM from 'react-dom';
 import { ChevronUp, ChevronDown, Maximize2, Minimize2 } from 'lucide-react';

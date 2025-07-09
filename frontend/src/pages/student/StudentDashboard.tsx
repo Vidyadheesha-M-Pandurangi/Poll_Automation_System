@@ -1,39 +1,90 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, XAxis, YAxis, Tooltip, Bar } from "recharts";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { BookOpen, TrendingUp, Calendar, Trophy, Clock, Activity, CheckCircle } from "lucide-react";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useAllRooms, Poll } from "@/lib/api/livequizHooks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function StudentDashboard() {
   const [isDark] = useState(false);
 
-  // Dummy data
-  const pollStats = { total: 20, taken: 15, absent: 5 };
-  const pollResults = [
-    { name: "Math Poll", subject: "Algebra", score: 15, date: "12 Aug 2024" },
-    { name: "Science Poll", subject: "Physics", score: 12, date: "15 Sep 2024" },
-  ];
+  const { user } = useAuth();
+  const studentId = user?.userId || user?.uid;
 
-  const tasks = [
-    { name: "Discussion Algorithm", time: "08:00 - 12:00 PM", color: "red" },
-    { name: "Fundamental Math", time: "12:00 - 15:00 PM", color: "yellow" },
-    { name: "DNA Modifications in Humans", time: "Ongoing", color: "blue" },
-  ];
+  const { data: rooms, isLoading } = useAllRooms();
 
-  const projectColors = isDark ? ["#3b82f6", "#f59e0b"] : ["#6366f1", "#f59e42"];
+  const {
+    pollStats,
+    pollResults,
+    pollDetails,
+    tasks,
+    projectColors,
+  } = useMemo(() => {
+    if (!rooms || !Array.isArray(rooms) || !studentId) {
+      return {
+        pollStats: { total: 0, taken: 0, absent: 0 },
+        pollResults: [] as { name: string; subject: string; score: number; date: string }[],
+        pollDetails: [] as { title: string; type: string; timer: string }[],
+        tasks: [] as { name: string; time: string; color: string }[],
+        projectColors: isDark ? ["#3b82f6", "#f59e0b"] : ["#6366f1", "#f59e42"],
+      };
+    }
 
-  // Poll details data
-  const pollDetails = [
-    { title: "DNA Modifications in Humans", type: "Word Cloud", timer: "01:30" },
-    { title: "Discussion Algorithm", type: "MCQ", timer: "00:45" },
-    { title: "Fundamental Math", type: "MCQ", timer: "00:30" },
-  ];
+    const allPolls: Poll[] = rooms.flatMap((room) => room.polls || []);
 
-  const themeClasses = isDark ? 'dark' : '';
+    const totalPolls = allPolls.length;
+
+    // Polls answered by student
+    const answeredPolls = allPolls.filter((p) => p.answers?.some((a) => a.userId === studentId));
+    const taken = answeredPolls.length;
+    const absent = totalPolls - taken;
+
+    // Poll results (score) simple: 1 for correct answer else 0
+    const pollResults = answeredPolls.slice(0, 5).map((p) => {
+      const studentAnswer = p.answers.find((a) => a.userId === studentId);
+      const isCorrect = studentAnswer?.answerIndex === p.correctOptionIndex;
+      const score = isCorrect ? 20 : 0; // Assume 20 max
+      return {
+        name: p.question.substring(0, 30),
+        subject: "", // Not provided
+        score,
+        date: new Date(p.createdAt).toLocaleDateString(),
+      };
+    });
+
+    // Poll details list (recent unanswered polls maybe)
+    const pollDetails = allPolls.slice(0, 3).map((p) => ({
+      title: p.question.substring(0, 30),
+      type: "MCQ",
+      timer: `${p.timer ?? 30}s`,
+    }));
+
+    // TODO: tasks/upcoming
+    const tasks: { name: string; time: string; color: string }[] = [];
+
+    return {
+      pollStats: { total: totalPolls, taken, absent },
+      pollResults,
+      pollDetails,
+      tasks,
+      projectColors: isDark ? ["#3b82f6", "#f59e0b"] : ["#6366f1", "#f59e42"],
+    };
+  }, [rooms, studentId, isDark]);
+
+  const themeClasses = isDark ? "dark" : "";
 
   return (
     <div className={`${themeClasses} transition-colors duration-300`}>
       <div className="p-6 space-y-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen">
+        {isLoading && (
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        )}
         {/* Top Row: Welcome Banner and Poll Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Welcome Banner */}

@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom";
 import TeacherLayout from "@/layouts/teacher-layout";
-import Dashboard from "@/pages/teacher/dashboard";
+import Dashboard from "@/pages/teacher/TeacherDashboard";
 import GenAIHomePage from "@/pages/teacher/genai-home";
 import PollRoomPage from "@/pages/teacher/TeacherPollRoom";
 import CreateRoomPage from "@/pages/teacher/CreatePollRoom";

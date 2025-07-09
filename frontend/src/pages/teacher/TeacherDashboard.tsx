@@ -1,63 +1,144 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import React, { useMemo, useState } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { useState } from "react";
 import { BarChart3, Users, TrendingUp, Clock, Calendar, HelpCircle } from "lucide-react";
+import { useRoomsByTeacher, Poll } from "@/lib/api/livequizHooks";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthStore } from "@/lib/store/auth-store";
 
 export default function TeacherDashboard() {
   const [isDark] = useState(false);
 
-  // Top stats (total)
-  const overview = {
-    totalPolls: 12,
-    totalResponses: 340,
-    totalParticipationRate: 80,
-  };
+  /**********************
+   * Authentication
+   **********************/
+  const { user } = useAuthStore();
+  const teacherId = user?.userId || user?.uid; // fallback to firebase UID if backend userId is absent
 
-  // Live stats for Participation & Results
-  const liveParticipation = {
-    attended: 34,
-    notAttended: 6,
-    participationRate: 85,
-  };
+  /**********************
+   * Data fetching
+   **********************/
+  const { data: rooms, isLoading } = useRoomsByTeacher(teacherId);
 
-  const recentPolls = [
-    { name: "Math Quiz", created: "2024-06-01", attended: 28, notAttended: 2 },
-    { name: "Science Poll", created: "2024-05-30", attended: 25, notAttended: 5 },
-  ];
+  /**********************
+   * Data computations
+   **********************/
+  const {
+    overview,
+    liveParticipation,
+    recentPolls,
+    pollDetails,
+    activePolls,
+    upcomingPolls,
+    pollResults,
+  } = useMemo(() => {
+    if (!rooms || !Array.isArray(rooms)) {
+      // Default placeholders while loading or if no rooms
+      return {
+        overview: {
+          totalPolls: 0,
+          totalResponses: 0,
+          totalParticipationRate: 0,
+        },
+        liveParticipation: {
+          attended: 0,
+          notAttended: 0,
+          participationRate: 0,
+        },
+        recentPolls: [] as { name: string; created: string; attended: number; notAttended: number }[],
+        pollDetails: [] as { title: string; type: string; timer: string }[],
+        activePolls: [] as { title: string; status: string }[],
+        upcomingPolls: [] as { name: string; time: string }[],
+        pollResults: [],
+      };
+    }
 
-  const pollResults = [
-    { option: "A", votes: 20 },
-    { option: "B", votes: 10 },
-    { option: "C", votes: 5 },
-    { option: "D", votes: 8 },
-    { option: "E", votes: 12 },
-  ];
+    // Aggregate stats
+    const allPolls: Poll[] = rooms.flatMap((r) => r.polls || []);
 
-  const pollDetails = [
-    { title: "Math Quiz", type: "MCQ", timer: "01:00" },
-    { title: "Science Poll", type: "MCQ", timer: "00:45" },
-  ];
+    const totalPolls = allPolls.length;
+    const totalResponses = allPolls.reduce((acc, p) => acc + (p.answers?.length || 0), 0);
 
-  const activePolls = [
-    { title: "Math Quiz", status: "Ongoing" },
-  ];
+    // Participation rate: average responses per poll (percentage out of options length?)
+    const totalParticipationRate = totalPolls
+      ? Math.round((totalResponses / totalPolls) * 100) / 100 // average responses
+      : 0;
 
-  const upcomingPolls = [
-    { name: "English Quiz", time: "Tomorrow 10:00 AM" },
-    { name: "History Poll", time: "Friday 2:00 PM" },
-  ];
+    // Live participation based on most recent poll (if exists)
+    const latestPoll = allPolls.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+    const liveParticipation = latestPoll
+      ? {
+          attended: latestPoll.answers?.length || 0,
+          notAttended: 0, // Backend does not expose total participants, fallback to 0
+          participationRate: latestPoll.answers?.length || 0,
+        }
+      : { attended: 0, notAttended: 0, participationRate: 0 };
 
+    // Recent polls (last 5)
+    const recentPolls = allPolls
+      .slice()
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 5)
+      .map((p) => ({
+        name: p.question.substring(0, 30),
+        created: new Date(p.createdAt).toLocaleDateString(),
+        attended: p.answers?.length || 0,
+        notAttended: 0,
+      }));
+
+    // Poll details for recent polls (limit 3)
+    const pollDetails = recentPolls.slice(0, 3).map((r) => ({
+      title: r.name,
+      type: "MCQ", // Type not provided by backend
+      timer: "--:--", // Timer not provided
+    }));
+
+    const activePolls = rooms
+      .filter((room) => room.status === "active")
+      .map((room) => ({ title: room.name, status: "Ongoing" }));
+
+    const upcomingPolls: { name: string; time: string }[] = []; // No backend scheduling yet
+
+    // Poll results for latest poll (bar chart)
+    const pollResults = latestPoll
+      ? latestPoll.options.map((opt, idx) => ({
+          option: opt,
+          votes: latestPoll.answers?.filter((a) => a.answerIndex === idx).length || 0,
+        }))
+      : [];
+
+    return {
+      overview: { totalPolls, totalResponses, totalParticipationRate },
+      liveParticipation,
+      recentPolls,
+      pollDetails,
+      activePolls,
+      upcomingPolls,
+      pollResults,
+    };
+  }, [rooms]);
+
+  const themeClasses = isDark ? "dark" : "";
+
+  // FAQs can stay static for now
   const faqs = [
     { q: "How do I create a poll?", a: "Click the 'Create Poll' button and fill in the details." },
     { q: "How to use AI to generate polls?", a: "Click 'AI Create Poll' and follow the prompts." },
   ];
 
-  const themeClasses = isDark ? 'dark' : '';
-
   return (
     <div className={`${themeClasses} transition-colors duration-300`}>
       <div className="p-6 space-y-6 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 min-h-screen">
+        {/* Loading state */}
+        {isLoading && (
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        )}
+
         {/* Top Row: Welcome Banner and Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Welcome Banner */}
@@ -66,7 +147,12 @@ export default function TeacherDashboard() {
               {/* Left: Text (50%) */}
               <div className="w-1/2 flex flex-col justify-center">
                 <h2 className="text-2xl font-bold mb-2 drop-shadow-sm">
-                  Welcome Back! <span className="capitalize">Teacher</span>
+                  Welcome Back!
+                  <br />
+                  <span className="capitalize">
+                    {user?.salutation ? `${user.salutation} ` : ""}
+                    {user?.name || "Teacher"}
+                  </span>
                 </h2>
                 <p className="mb-4 text-lg font-semibold opacity-90 drop-shadow-sm">
                   Empower, Engage, Evaluate—Live!

@@ -12,7 +12,35 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const API_URL = import.meta.env.VITE_API_URL;
+/**
+ * Dynamically build the backend base URL so we don't accidentally hit
+ * `localhost` in production (which would trigger a network error that
+ * surfaces as a generic "Failed to fetch").
+ * Priority order:
+ * 1. `VITE_API_URL` env var – if supplied, make sure it ends with "/api".
+ * 2. Same-origin fallback – useful for deployed setups where the frontend is
+ *    served by the backend (e.g. nginx reverse-proxy) and no env var is set.
+ * 3. Development default – localhost:3000 (backend dev server).
+ */
+function getApiUrl(): string {
+    const raw = (import.meta.env.VITE_API_URL as string | undefined)?.trim();
+
+    if (raw && raw.length > 0) {
+        // Ensure we have exactly one trailing "/api" segment.
+        return raw.endsWith('/api') ? raw : `${raw.replace(/\/$/, '')}/api`;
+    }
+
+    // Same-origin fallback (handles production deployments where backend &
+    // frontend share a host and no explicit env var is provided).
+    if (typeof window !== 'undefined') {
+        return `${window.location.origin}/api`;
+    }
+
+    // Final fall-back for local development.
+    return 'http://localhost:3000/api';
+}
+
+const API_URL = getApiUrl();
 
 interface Room {
     roomCode: string;
@@ -57,6 +85,14 @@ export default function ManageRoom() {
                 });
                 if (!response.ok) {
                     throw new Error(`Failed to fetch rooms: ${response.status}`);
+                }
+
+                // Ensure the response is JSON; otherwise throw an informative error
+                const contentType = response.headers.get("content-type") || "";
+                if (!contentType.includes("application/json")) {
+                    throw new Error(
+                        "Server returned non-JSON response. Check that API_URL is correct and backend is running."
+                    );
                 }
 
                 const data = await response.json();

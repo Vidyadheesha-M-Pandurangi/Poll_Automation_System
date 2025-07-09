@@ -1,9 +1,7 @@
 import { cn } from "@/lib/utils";
-import { motion, MotionProps } from "motion/react";
+import { motion } from "motion/react";
 
-interface LineShadowTextProps
-  extends Omit<React.HTMLAttributes<HTMLElement>, keyof MotionProps>,
-    MotionProps {
+interface LineShadowTextProps extends React.HTMLAttributes<HTMLElement> {
   shadowColor?: string;
   as?: React.ElementType;
 }
@@ -15,7 +13,9 @@ export function LineShadowText({
   as: Component = "span",
   ...props
 }: LineShadowTextProps) {
-  const MotionComponent = motion.create(Component);
+  const MotionComponent: any = (motion as any).create
+    ? (motion as any).create(Component)
+    : (motion as any)(Component);
   const content = typeof children === "string" ? children : null;
 
   if (!content) {

@@ -94,6 +94,13 @@ export class PollRoomController {
   async getAllRoomsByTeacher(@Param('teacherId') teacherId: string) {
     return await this.roomService.getRoomsByTeacher(teacherId);
   }
+
+  // 👉 New endpoint: Fetch all rooms (for student dashboards or admin views)
+  @Get('/all')
+  async getAllRooms() {
+    return await this.roomService.getAllRooms();
+  }
+
   //@Authorized()
   @Get('/teacher/:teacherId/active')
   async getActiveRoomsByTeacher(@Param('teacherId') teacherId: string) {

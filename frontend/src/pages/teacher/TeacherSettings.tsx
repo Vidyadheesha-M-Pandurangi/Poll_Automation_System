@@ -55,6 +55,7 @@ export default function TeacherSettings() {
     department: "",
     specialization: "",
     experience: "5+ years",
+    salutation: user?.salutation || "",
     avatar: user?.avatar || "",
   });
 
@@ -123,7 +124,7 @@ export default function TeacherSettings() {
 
   // Teaching preferences
   const [teachingSettings, setTeachingSettings] = useState({
-    designation: "",
+    designation: user?.designation || "",
     classReminders: true,
     reminderTimes: ["08:00", "14:00", "18:00"],
     gradeDeadlineReminders: true,
@@ -153,6 +154,8 @@ export default function TeacherSettings() {
       name: profileData.name,
       email: profileData.email,
       avatar: profileData.avatar,
+      designation: teachingSettings.designation,
+      salutation: profileData.salutation,
     });
   };
 
@@ -238,6 +241,25 @@ export default function TeacherSettings() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <Label htmlFor="salutation">Salutation</Label>
+              <Select
+                value={profileData.salutation}
+                onValueChange={(value: string) => {
+                  setProfileData({...profileData, salutation: value});
+                  setHasChanges(true);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select salutation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mr.">Mr.</SelectItem>
+                  <SelectItem value="Mrs.">Mrs.</SelectItem>
+                  <SelectItem value="Dr.">Dr.</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
@@ -276,15 +298,15 @@ export default function TeacherSettings() {
               />
             </div>
             <div>
-              <Label htmlFor="office-location">Office Location</Label>
+              <Label htmlFor="institution-name">Institution Name</Label>
               <Input
-                id="office-location"
+                id="institution-name"
                 value={profileData.officeLocation}
                 onChange={(e) => {
                   setProfileData({...profileData, officeLocation: e.target.value});
                   setHasChanges(true);
                 }}
-                placeholder="Enter your office location"
+                placeholder="Enter your institution name"
               />
             </div>
             <div>
@@ -696,18 +718,23 @@ export default function TeacherSettings() {
         <CardContent className="space-y-6">
           <div>
             <Label htmlFor="designation">Designation</Label>
-            <Input
-              id="designation"
+            <Select
               value={teachingSettings.designation}
-              onChange={(e) => {
-                setTeachingSettings({...teachingSettings, designation: e.target.value});
+              onValueChange={(value: string) => {
+                setTeachingSettings({...teachingSettings, designation: value});
                 setHasChanges(true);
               }}
-              placeholder="Enter your institutional designation (e.g., Professor, Associate Professor)"
-            />
-            <p className="text-sm text-muted-foreground mt-1">
-              Enter the designation provided by your institution
-            </p>
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select your designation" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Assistant Professor">Assistant Professor</SelectItem>
+                <SelectItem value="Associate Professor">Associate Professor</SelectItem>
+                <SelectItem value="Professor">Professor</SelectItem>
+                <SelectItem value="Head of the Department">Head of the Department</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div>
             <Label htmlFor="office-hours">Office Hours</Label>

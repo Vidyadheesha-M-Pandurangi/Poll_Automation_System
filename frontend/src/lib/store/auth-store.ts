@@ -7,6 +7,8 @@ export type User = {
   name?: string;
   role: 'teacher' | 'student' | 'admin' | null;
   avatar?: string;
+  designation?: string;
+  salutation?: string;
   // Backend user fields
   userId?: string;
   firstName?: string;
@@ -38,6 +40,8 @@ export const useAuthStore = create<AuthStore>()(
         if (user.email) localStorage.setItem('user-email', user.email);
         if (user.firstName) localStorage.setItem('user-firstName', user.firstName);
         if (user.lastName) localStorage.setItem('user-lastName', user.lastName);
+        if (user.designation) localStorage.setItem('user-designation', user.designation);
+        if (user.salutation) localStorage.setItem('user-salutation', user.salutation);
         
         set({ user, isAuthenticated: true });
       },
@@ -52,6 +56,8 @@ export const useAuthStore = create<AuthStore>()(
         localStorage.removeItem('user-email');
         localStorage.removeItem('user-firstName');
         localStorage.removeItem('user-lastName');
+        localStorage.removeItem('user-designation');
+        localStorage.removeItem('user-salutation');
         set({ user: null, token: null, isAuthenticated: false });
       },
       hasRole: (role) => {

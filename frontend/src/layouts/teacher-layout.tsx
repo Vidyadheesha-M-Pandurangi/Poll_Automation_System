@@ -4,7 +4,7 @@ import { useAuthStore } from "@/lib/store/auth-store";
 import { Outlet, Link, useNavigate, useLocation } from "@tanstack/react-router";
 import { logout } from "@/lib/api/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, Home, Users, PlusCircle, Settings, User, ChevronDown } from "lucide-react";
+import { LogOut, Home, Users, PlusCircle, User, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -155,23 +155,6 @@ export default function TeacherLayout() {
               </Link>
             </Button>
             */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`relative h-10 px-4 text-sm font-medium transition-all duration-300 group ${isActiveRoute('/teacher/settings')
-                ? 'bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 shadow-md shadow-purple-200/50 dark:from-purple-900/40 dark:to-blue-900/40 dark:text-purple-300 dark:shadow-purple-900/20'
-                : 'text-slate-700 hover:bg-gradient-to-r hover:from-slate-100 hover:to-blue-50 hover:text-slate-900 hover:shadow-md hover:shadow-slate-200/50 dark:text-gray-300 dark:hover:bg-gradient-to-r dark:hover:from-gray-800 dark:hover:to-gray-700 dark:hover:text-white dark:hover:shadow-gray-900/20'
-                }`}
-              asChild
-            >
-              <Link to="/teacher/settings">
-                <Settings className="h-4 w-4 mr-2" />
-                <span className="relative z-10">Settings</span>
-                {isActiveRoute('/teacher/settings') && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-md dark:from-purple-400/20 dark:to-blue-400/20" />
-                )}
-              </Link>
-            </Button>
           </nav>
 
           {/* Enhanced Right side */}
@@ -245,6 +228,28 @@ export default function TeacherLayout() {
                     </div>
                     <div className="text-xs text-slate-500 dark:text-gray-400">
                       Manage your account
+                    </div>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-slate-200/80 dark:bg-gray-700/80" />
+
+                {/* Settings Link */}
+                <DropdownMenuItem
+                  onClick={() => navigate({ to: "/teacher/settings" })}
+                  className="flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all duration-200 dark:hover:from-blue-900/30 dark:hover:to-cyan-900/30"
+                >
+                  <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center dark:from-blue-900/50 dark:to-cyan-900/50">
+                    <svg className="h-4 w-4 text-blue-600 dark:text-cyan-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-slate-900 dark:text-gray-100">
+                      Settings
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">
+                      App preferences
                     </div>
                   </div>
                 </DropdownMenuItem>
